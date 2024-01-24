@@ -13,6 +13,10 @@ jobs:
         id: get-signing-key
         run: |
           echo "foo" > ./synsation.pem
+      - name: Read Signing Key
+        id: read-signing-key
+        run: |
+          cat ./synsation.pem
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.4
@@ -21,6 +25,6 @@ jobs:
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
           feed: "my-project-v0.1"
           signed-statement-file: "signed-statement.sbom"
-          signing-key-file: "synsation.pem"
+          signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
           output-file: "receipt.cbor"
