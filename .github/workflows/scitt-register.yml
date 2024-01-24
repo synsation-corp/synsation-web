@@ -1,0 +1,26 @@
+name: SCITT Register Statements
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  register-scitt-statements:
+    runs-on: ubuntu-latest
+    name: Register SCITT Signed Statement
+    steps:
+      - name: Get Signing Key
+        id: get-signing-key
+        run: |
+          echo ${{ secrets.SYNSATION_SIGNING_KEY }} > ./synsation.pem
+      - name: Register SCITT Signed Statement
+        id: register-scitt-signed-statement
+        uses: datatrails/scitt-action@v0.3.7.4
+        with:
+          scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
+          feed: "my-project-v0.1"
+          signed-statement-file: "signed-statement.sbom"
+          signing-key-file: "synsation.pem"
+          issuer: "synsation.io"
+          output-file: "receipt.cbor"
