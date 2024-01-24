@@ -12,7 +12,7 @@ jobs:
       - name: Get Signing Key
         id: get-signing-key
         run: |
-          echo ${{ secrets.SYNSATION_SIGNING_KEY }} > ./synsation.pem
+          echo "foo" > ./synsation.pem
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.4
