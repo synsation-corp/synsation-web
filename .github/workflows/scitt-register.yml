@@ -9,10 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Register SCITT Signed Statement
     steps:
-      - name: Get Signing Key
-        id: get-signing-key
+      - name: save-keys
+        env:
+          SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+        shell: bash
         run: |
-          echo ${{ secrets.DATATRAILS_CLIENT_ID }} > ./synsation.pem
+          echo "$SIGNING_KEY" >> ./synsation.pem
       - name: Read Signing Key
         id: read-signing-key
         run: |
