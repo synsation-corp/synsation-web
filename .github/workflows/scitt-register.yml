@@ -25,7 +25,7 @@ jobs:
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
-          feed: ${{ vars.GITHUB_REPOSITORY }} + ":" + ${{ vars.GITHUB_SHA }}
+          feed: ${{ github.repository }}:${{ github.sha }}"
           payload: "./payload.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
