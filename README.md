@@ -9,6 +9,7 @@ docker build -t synsation-io-web:$(git show --format="%h" --no-patch) .
 ```
 
 1. Generate an SPDX SBOM
+
 ```sh
 sbom-tool generate -b /spdx -bc . -pn synsation-web -pv 0.1 -ps synsation-org -nsb synsation.io
 ```

@@ -21,11 +21,11 @@ jobs:
           echo "$SIGNING_KEY" >> ./synsation.pem
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.3.7.8
+        uses: datatrails/scitt-action@v0.3.7.9
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
-          feed: "$GITHUB_REPOSITORY:$GITHUB_SHA"
+          feed: ${{ vars.GITHUB_REPOSITORY }} + ":" + ${{ vars.GITHUB_SHA }}
           payload: "./payload.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
