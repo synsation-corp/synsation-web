@@ -29,7 +29,6 @@ jobs:
           payload: "./payload.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
-          output-file: "receipt.cbor"
       - name: cleanup-keys
         shell: bash
         run: |
