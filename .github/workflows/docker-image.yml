@@ -43,8 +43,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Create Output Directory
+        # SPDX automatically creates the _manifest sub directories.
+        # CycloneDX assumes the current directory
+        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
-          mkdir buildOutput
+          mkdir -p ./buildOutput/_manifest/cyclonedx/
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
