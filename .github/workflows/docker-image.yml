@@ -1,4 +1,4 @@
-name: Docker Buil/Push Synsation Web
+name: Docker Buil/Push, SCITT Register Synsation Web
 
 on:
   push:
@@ -50,10 +50,6 @@ jobs:
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
-  register-scitt-statements:
-    runs-on: ubuntu-latest
-    name: Register SCITT Signed Statement
-    steps:
       - name: save-keys
         env:
           SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
