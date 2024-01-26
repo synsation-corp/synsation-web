@@ -57,14 +57,30 @@ jobs:
         run: |
           echo "$SIGNING_KEY" >> ./synsation.pem
           cat ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
-      - name: Register SCITT Signed Statement
+      - name: Register SPDX as a SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.39
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
-          feed: ${{ github.repository }}:v0.2
+          feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          signing-key-file: "./synsation.pem"
+          issuer: "synsation.io"
+      - name: Generate CycloneDX SBOM for Python
+        uses: CycloneDX/gh-python-generate-sbom@v2
+        with:
+          input: ./requirements.txt
+          output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
+          format: json
+      - name: Register CylconeDX as a SCITT Signed Statement
+        id: register-cyclonedx-signed-statement
+        uses: datatrails/scitt-action@v0.3.7.39
+        with:
+          scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
+          feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
       - name: cleanup-keys
