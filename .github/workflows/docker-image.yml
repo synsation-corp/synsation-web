@@ -50,6 +50,8 @@ jobs:
         id: docker-scout
         uses: docker/scout-action@v1
         with:
+          dockerhub-user: ${{ env.DOCKER_HUB_USER}}
+          dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
           command: cves
           image: ${{ steps.meta.outputs.tags }}
           sarif-file: "./buildOutput/docker-scout-sarif.json"
@@ -60,8 +62,6 @@ jobs:
         with:
           scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ env.DATATRAILS_SECRET }}
-          dockerhub-user: ${{ env.DOCKER_HUB_USER}}
-          dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
           feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/docker-scout-sarif.json"
           content-type: "application/vnd.docker.scout+json"
@@ -122,6 +122,17 @@ jobs:
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
           echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
+      - name: Register SPDX as a SCITT Signed Statement
+        id: register-compliance-scitt-signed-statement
+        uses: datatrails/scitt-action@v0.3.7.40
+        with:
+          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ env.DATATRAILS_SECRET }}
+          feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/attestation.json"
+          content-type: "application/vnd.unknown.attestation+json"
+          signing-key-file: "./synsation.pem"
+          issuer: "synsation.io"
       - name: cleanup-keys
         shell: bash
         run: |
