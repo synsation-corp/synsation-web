@@ -46,6 +46,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Create buildOutput Directory
+        run: |
+          mkdir -p ./buildOutput/
       - name: Docker Scout
         id: docker-scout
         uses: docker/scout-action@v1
@@ -67,9 +70,6 @@ jobs:
           content-type: "application/vnd.docker.scout+json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
-      - name: Create buildOutput Directory
-        run: |
-          mkdir -p ./buildOutput/
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
