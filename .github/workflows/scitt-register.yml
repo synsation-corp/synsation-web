@@ -2,7 +2,7 @@ name: SCITT Register Statements
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "test" ]
 
 jobs:
   register-scitt-statements:
@@ -19,6 +19,7 @@ jobs:
         shell: bash
         run: |
           echo "$SIGNING_KEY" >> ./synsation.pem
+          cat ./spdx/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.39
@@ -26,7 +27,7 @@ jobs:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
           feed: ${{ github.repository }}:v0.1
-          payload: "./payload.json"
+          payload: "/spdx/_manifest/spdx_2.2/manifest.spdx.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
       - name: cleanup-keys

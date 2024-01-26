@@ -2,9 +2,9 @@ name: Docker Buil/Push Synsation Web
 
 on:
   push:
-    branches: [ "release" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "release" ]
+    branches: [ "main" ]
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
@@ -54,19 +54,24 @@ jobs:
     runs-on: ubuntu-latest
     name: Register SCITT Signed Statement
     steps:
-      - name: Get Signing Key
-        id: get-signing-key
+      - name: save-keys
+        env:
+          SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+        shell: bash
         run: |
-          echo ${{ secrets.SYNSATION_SIGNING_KEY }} > ./synsation.pem
+          echo "$SIGNING_KEY" >> ./synsation.pem
+          cat ./spdx/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.3.7.4
+        uses: datatrails/scitt-action@v0.3.7.39
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
-          feed: "my-project-v0.1"
-          signed-statement-file: "signed-statement.sbom"
-          signing-key-file: "synsation.pem"
+          feed: ${{ github.repository }}:v0.2
+          payload: "./spdx/_manifest/spdx_2.2/manifest.spdx.json"
+          signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
-          output-file: "receipt.cbor"
-      
+      - name: cleanup-keys
+        shell: bash
+        run: |
+          rm ./synsation.pem
