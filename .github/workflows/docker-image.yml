@@ -43,11 +43,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Create Output Directory
-        # SPDX automatically creates the _manifest sub directories.
-        # CycloneDX assumes the current directory
-        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
-          mkdir -p ./buildOutput/_manifest/cyclonedx/
+          mkdir -p ./buildOutput/
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
@@ -70,6 +67,12 @@ jobs:
           payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
+      - name: Create Output Directory
+        # SPDX automatically creates the _manifest sub directories.
+        # CycloneDX assumes the current directory
+        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
+        run: |
+          mkdir -p ./buildOutput/_manifest/cyclonedx/
       - name: Generate CycloneDX SBOM for Python
         uses: CycloneDX/gh-python-generate-sbom@v2
         with:
