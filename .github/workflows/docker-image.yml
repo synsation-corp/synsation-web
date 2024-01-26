@@ -59,12 +59,13 @@ jobs:
           cat ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.3.7.39
+        uses: datatrails/scitt-action@v0.3.7.40
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
           feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          content-type: "application/spdx+json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
       - name: Create Output Directory
@@ -81,11 +82,12 @@ jobs:
           format: json
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
-        uses: datatrails/scitt-action@v0.3.7.39
+        uses: datatrails/scitt-action@v0.3.7.40
         with:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
           feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          content-type: "application/vnd.cyclonedx+json"
           payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
