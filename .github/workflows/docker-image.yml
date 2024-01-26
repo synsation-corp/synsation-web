@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           echo "$SIGNING_KEY" >> ./synsation.pem
-          cat ./spdx/_manifest/spdx_2.2/manifest.spdx.json
+          cat ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.39
@@ -68,7 +68,7 @@ jobs:
           scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
           feed: ${{ github.repository }}:v0.2
-          payload: "./spdx/_manifest/spdx_2.2/manifest.spdx.json"
+          payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
       - name: cleanup-keys
