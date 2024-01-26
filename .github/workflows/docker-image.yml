@@ -10,7 +10,9 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
+  DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
+  DATATRAILS_SECRET: ${{ secrets.DATATRAILS_SECRET }}
+  SYNSATION_SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
@@ -42,7 +44,26 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Create Output Directory
+      - name: Docker Scout
+        id: docker-scout
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: ${{ steps.meta.outputs.tags }}
+          sarif-file: "./buildOutput/docker-scout-sarif.json"
+          summary: true
+      - name: Register Docker Scout Output as a SCITT Signed Statement
+        id: register-scitt-signed-statement
+        uses: datatrails/scitt-action@v0.3.7.40
+        with:
+          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ env.DATATRAILS_SECRET }}
+          feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/docker-scout-sarif.json"
+          content-type: "application/vnd.docker.scout+json"
+          signing-key-file: "./synsation.pem"
+          issuer: "synsation.io"
+      - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
       - name: Generate SPDX SBOM
@@ -52,17 +73,17 @@ jobs:
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
       - name: save-keys
         env:
-          SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
         shell: bash
         run: |
           echo "$SIGNING_KEY" >> ./synsation.pem
           cat ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
-        id: register-scitt-signed-statement
+        id: register-spdx-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.40
         with:
-          scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
-          scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
+          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ env.DATATRAILS_SECRET }}
           feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           content-type: "application/spdx+json"
@@ -84,13 +105,19 @@ jobs:
         id: register-cyclonedx-signed-statement
         uses: datatrails/scitt-action@v0.3.7.40
         with:
-          scitt-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
-          scitt-secret: ${{ secrets.DATATRAILS_SECRET }}
+          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ env.DATATRAILS_SECRET }}
           feed: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           content-type: "application/vnd.cyclonedx+json"
           payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
+      - name: Create Compliance Statement
+        # SPDX automatically creates the _manifest sub directories.
+        # CycloneDX assumes the current directory
+        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
+        run: |
+          echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
       - name: cleanup-keys
         shell: bash
         run: |
