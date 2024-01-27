@@ -24,12 +24,6 @@ jobs:
       packages: write
       # 
     steps:
-      - name: save-keys
-        env:
-          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
-        shell: bash
-        run: |
-          echo "$SIGNING_KEY" >> ./synsation.pem
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Log in to the Container registry
@@ -55,6 +49,12 @@ jobs:
       - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
+      - name: save-keys
+        env:
+          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
+        shell: bash
+        run: |
+          echo "$SIGNING_KEY" >> ./synsation.pem
       - name: Docker Scout
         id: docker-scout
         uses: docker/scout-action@v1
