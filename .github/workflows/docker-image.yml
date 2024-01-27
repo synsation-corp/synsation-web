@@ -24,6 +24,12 @@ jobs:
       packages: write
       # 
     steps:
+      - name: save-keys
+        env:
+          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
+        shell: bash
+        run: |
+          echo "$SIGNING_KEY" >> ./synsation.pem
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Log in to the Container registry
@@ -75,13 +81,6 @@ jobs:
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
-      - name: save-keys
-        env:
-          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
-        shell: bash
-        run: |
-          echo "$SIGNING_KEY" >> ./synsation.pem
-          cat ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
         uses: datatrails/scitt-action@v0.3.7.40
