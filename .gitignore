@@ -49,3 +49,4 @@ venv.bak/
 # SPDX Folders
 spdx/
 buildOutput/
+docker-scount.md
