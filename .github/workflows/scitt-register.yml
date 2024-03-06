@@ -69,7 +69,7 @@ jobs:
           cat ./buildOutput/docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.4
+        uses: datatrails/scitt-action@v0.4.4.5
         with:
           scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ env.DATATRAILS_SECRET }}
@@ -85,7 +85,7 @@ jobs:
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.4
+        uses: datatrails/scitt-action@v0.4.4.5
         with:
           scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ env.DATATRAILS_SECRET }}
@@ -108,7 +108,7 @@ jobs:
           format: json
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.4
+        uses: datatrails/scitt-action@v0.4.4.5
         with:
           scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ env.DATATRAILS_SECRET }}
@@ -125,7 +125,7 @@ jobs:
           echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.4
+        uses: datatrails/scitt-action@v0.4.4.5
         with:
           scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           scitt-secret: ${{ env.DATATRAILS_SECRET }}
