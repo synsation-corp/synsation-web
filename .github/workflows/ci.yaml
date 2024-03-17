@@ -1,0 +1,39 @@
+name: Register SCITT Statement
+
+on:
+  workflow_dispatch:
+
+env:
+  DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
+  DATATRAILS_SECRET: ${{ secrets.DATATRAILS_SECRET }}
+  DIGICERT_STM_CERTIFICATE_ID: ${{ secrets.DIGICERT_STM_CERTIFICATE_ID }}
+  DIGICERT_STM_API_BASE_URI: ${{ secrets.DIGICERT_STM_API_BASE_URI }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_B64: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_B64 }}
+  DIGICERT_STM_API_KEY: ${{ secrets.DIGICERT_STM_API_KEY }}
+  FEED: "digicert/scitt-action-demo-v1.0"
+jobs:
+  build-image-register-DataTrails-SCITT:
+    runs-on: ubuntu-latest
+    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Create buildOutput Directory
+        run: |
+          mkdir -p ./buildOutput/
+      - name: Create Compliance Statement
+        # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
+        run: |
+          echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
+      - name: Register as a SCITT Signed Statement
+        # Register the Signed Statement with DataTrails SCITT APIs
+        id: register-compliance-scitt-signed-statement
+        uses: digicert/scitt-action@a369098e78114c1a903ada4ebd272ef585dac460
+        with:
+          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          scitt-secret: ${{ env.DATATRAILS_SECRET }}
+          feed: ${{ env.FEED }}
+          payload: "./buildOutput/attestation.json"
+          content-type: "application/vnd.unknown.attestation+json"
