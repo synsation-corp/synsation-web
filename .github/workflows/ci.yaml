@@ -47,11 +47,13 @@ jobs:
       - name: list-files
         run: |
             ls -a
-      - uses: actions/upload-artifact@v4
+      - name: upload-signed-statement
+        uses: actions/upload-artifact@v4
         with:
           name: signed-statement
           path: signed-statement.cbor
-      - uses: actions/upload-artifact@v4
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
         with:
           name: receipt
           path: receipt.cbor
