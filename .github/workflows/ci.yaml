@@ -44,3 +44,16 @@ jobs:
           feed: ${{ env.FEED }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
+      - name: list-files
+        run: |
+            ls -a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-statement
+          path: signed-statement.cbor
+      - uses: actions/upload-artifact@v4
+        with:
+          name: receipt
+          path: receipt.cbor
+          
+  
