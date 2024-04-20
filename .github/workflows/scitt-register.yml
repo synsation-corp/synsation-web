@@ -65,9 +65,6 @@ jobs:
           image: ${{ steps.meta.outputs.tags }}
           sarif-file: "./buildOutput/docker-scout-sarif.json"
           summary: true
-      - name: debug scout file
-        run: |
-          cat ./buildOutput/docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
         uses: datatrails/scitt-action@v0.4.4.8
