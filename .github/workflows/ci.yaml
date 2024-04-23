@@ -36,7 +36,7 @@ jobs:
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
-          subject: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}@${{ github.sha }}
+          subject: ${{ github.server_url }}/${{ github.repository }}@${{ github.sha }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
       - name: upload-signed-statement
