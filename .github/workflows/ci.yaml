@@ -25,7 +25,7 @@ jobs:
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
-          echo '{"compliance.42":"true","software.eol":"2025-03-15","signed_with":"digicert-stm"}' >> ./buildOutput/attestation.json
+          echo '{"author": "fred", "title": "my biography", "reviews": "mixed"}' > ./buildOutput/attestation.json
       - name: list files
         run: |
           ls -la ./buildOutput/ 
