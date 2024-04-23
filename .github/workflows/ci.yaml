@@ -28,7 +28,8 @@ jobs:
           echo '{"compliance.42":"true","software.eol":"2025-03-15","signed_with":"digicert-stm"}' >> ./buildOutput/attestation.json
       - name: list files
         run: |
-          ls -a
+          ls -la ./buildOutput/ 
+          cat ./buildOutput/attestation.json | jq
       - name: Register as a SCITT Signed Statement
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-signed-statement
