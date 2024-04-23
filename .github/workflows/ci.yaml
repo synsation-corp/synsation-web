@@ -20,13 +20,6 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Debug VARS
-        run: |
-          echo "DIGICERT_STM_CERTIFICATE_ID: $DIGICERT_STM_CERTIFICATE_ID"
-          echo "DIGICERT_STM_API_BASE_URI: $DIGICERT_STM_API_BASE_URI"
-          echo "DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD: $DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD"
-          echo "DIGICERT_STM_API_CLIENTAUTH_P12_B64: $DIGICERT_STM_API_CLIENTAUTH_P12_B64"
-          echo "DIGICERT_STM_API_KEY: $DIGICERT_STM_API_KEY"
       - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
@@ -44,9 +37,6 @@ jobs:
           feed: ${{ env.FEED }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
-      - name: list-files
-        run: |
-            ls -a
       - name: upload-signed-statement
         uses: actions/upload-artifact@v4
         with:
