@@ -32,9 +32,9 @@ jobs:
         id: register-compliance-scitt-signed-statement
         uses: digicert/scitt-action@a369098e78114c1a903ada4ebd272ef585dac460
         with:
-          scitt-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          scitt-secret: ${{ env.DATATRAILS_SECRET }}
-          feed: ${{ env.FEED }}
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.SUBJECT }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
       - name: upload-signed-statement
