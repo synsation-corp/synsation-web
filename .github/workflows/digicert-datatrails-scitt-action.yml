@@ -26,11 +26,11 @@ jobs:
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
-          echo '{"author": "fred", "title": "my biography", "reviews": "mixed"}' > ./buildOutput/attestation.json
+          echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
       - name: Register as a SCITT Signed Statement
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-signed-statement
-        uses: digicert/scitt-action@1e4b486f5df9b7e60dbfac34a5b5802358abb4ef
+        uses: SteveLasker/digicert-scitt-action/@6de9849a826c4cd2c983ee87493a4d7a0d386df4
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
