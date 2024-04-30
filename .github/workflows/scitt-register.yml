@@ -8,11 +8,11 @@ on:
   #   branches: [ "main" ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_SECRET: ${{ secrets.DATATRAILS_SECRET }}
   SYNSATION_SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 jobs:
