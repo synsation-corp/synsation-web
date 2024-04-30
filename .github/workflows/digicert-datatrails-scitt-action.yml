@@ -20,6 +20,20 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: | 
+            type=sha
+      - name: Build and push Docker image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
       - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
@@ -30,20 +44,94 @@ jobs:
       - name: Register as a SCITT Signed Statement
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-signed-statement
-        uses: SteveLasker/digicert-scitt-action/@6de9849a826c4cd2c983ee87493a4d7a0d386df4
+        uses: digicert/scitt-action@v0.2
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ github.server_url }}/${{ github.repository }}@${{ github.sha }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
-      - name: upload-signed-statement
+      - name: Docker Scout
+        id: docker-scout
+        uses: docker/scout-action@v1
+        with:
+          dockerhub-user: ${{ env.DOCKER_HUB_USER}}
+          dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
+          command: cves
+          image: ${{ steps.meta.outputs.tags }}
+          sarif-file: "./buildOutput/docker-scout-sarif.json"
+          summary: true
+      - name: Register Docker Scout Output as a SCITT Signed Statement
+        id: register-docker-scout-output
+        uses: digicert/scitt-action@v0.2
+        with:
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/docker-scout-sarif.json"
+          content-type: "application/vnd.docker.scout+json"
+      - name: upload-scout-signed-statement
         uses: actions/upload-artifact@v4
         with:
-          name: signed-statement
-          path: signed-statement.cbor
+          name: scout-signed-statement
+          path: receipt.cbor
       - name: upload-receipt
         uses: actions/upload-artifact@v4
         with:
-          name: receipt
+          name: scout-receipt
+          path: receipt.cbor
+      - name: Generate SPDX SBOM
+        run: |
+          curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
+          chmod +x $RUNNER_TEMP/sbom-tool
+          $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
+      - name: Register SPDX as a SCITT Signed Statement
+        id: register-spdx-scitt-signed-statement
+        uses: digicert/scitt-action@v0.2
+        with:
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          content-type: "application/spdx+json"
+      - name: upload-spdx-signed-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx-signed-statement
+          path: receipt.cbor
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx-receipt
+          path: receipt.cbor
+      - name: Create Output Directory
+        # SPDX automatically creates the _manifest sub directories.
+        # CycloneDX assumes the current directory
+        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
+        run: |
+          mkdir -p ./buildOutput/_manifest/cyclonedx/
+      - name: Generate CycloneDX SBOM for Python
+        uses: CycloneDX/gh-python-generate-sbom@v2
+        with:
+          input: ./requirements.txt
+          output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
+          format: json
+      - name: Register CylconeDX as a SCITT Signed Statement
+        id: register-cyclonedx-signed-statement
+        uses: digicert/scitt-action@v0.2
+        with:
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          content-type: "application/vnd.cyclonedx+json"
+          payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
+      - name: upload-cyclonedx-signed-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-signed-statement
+          path: receipt.cbor
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-receipt
           path: receipt.cbor
