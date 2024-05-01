@@ -65,7 +65,7 @@ jobs:
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
-          skip-receipt: "1"
+          # skip-receipt: "1"
       - name: save-keys
         env:
           SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
@@ -83,6 +83,39 @@ jobs:
           content-type: "application/vnd.unknown.attestation+json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
+      - name: Create Output Directory
+        # SPDX automatically creates the _manifest sub directories.
+        # CycloneDX assumes the current directory
+        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
+        run: |
+          mkdir -p ./buildOutput/_manifest/cyclonedx/
+      - name: Generate CycloneDX SBOM for Python
+        uses: CycloneDX/gh-python-generate-sbom@v2
+        with:
+          input: ./requirements.txt
+          output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
+          format: json
+      - name: Register CylconeDX as a SCITT Signed Statement
+        id: register-cyclonedx-signed-statement
+        # uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@main
+        with:
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          content-type: "application/vnd.cyclonedx+json"
+          payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
+          # skip-receipt: "1"
+      - name: upload-cyclonedx-signed-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-signed-statement
+          path: receipt.cbor
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-receipt
+          path: receipt.cbor
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
@@ -95,6 +128,7 @@ jobs:
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
         uses: SteveLasker/digicert-scitt-action@main
+        # uses: digicert/scitt-action@v0.2
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
