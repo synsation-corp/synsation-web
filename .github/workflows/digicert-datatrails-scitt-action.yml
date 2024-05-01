@@ -57,13 +57,15 @@ jobs:
       - name: Register as a SCITT Signed Statement
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-digicert-signed-statement
-        uses: digicert/scitt-action@v0.2
+        # uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@11f06714e15a25a2117300c30ecf59cd88156449
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
+          skip-receipt: "1"
       - name: save-keys
         env:
           SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
@@ -92,13 +94,14 @@ jobs:
           ls -a ./buildOutput/_manifest/spdx_2.2
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@11f06714e15a25a2117300c30ecf59cd88156449
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           content-type: "application/spdx+json"
+          skip-receipt: "1"
       - name: upload-spdx-signed-statement
         uses: actions/upload-artifact@v4
         with:
