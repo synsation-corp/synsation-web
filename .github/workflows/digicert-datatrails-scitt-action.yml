@@ -58,7 +58,7 @@ jobs:
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-digicert-signed-statement
         # uses: digicert/scitt-action@v0.2
-        uses: SteveLasker/digicert-scitt-action@f1f971baaa7155d9f1299e252de0afd320dabc78
+        uses: SteveLasker/digicert-scitt-action
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
@@ -94,7 +94,7 @@ jobs:
           ls -a ./buildOutput/_manifest/spdx_2.2
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: SteveLasker/digicert-scitt-action@f1f971baaa7155d9f1299e252de0afd320dabc78
+        uses: SteveLasker/digicert-scitt-action
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
