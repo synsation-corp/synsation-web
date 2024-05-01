@@ -1,16 +1,18 @@
-name: Docker Buil/Push, SCITT Register Synsation Web
+name: Register SBOMs as DigiCert Signed SCITT Statement on DataTrails
 
 on:
   workflow_dispatch:
-    # push:
+  # push:
   #   branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
-
 env:
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_SECRET: ${{ secrets.DATATRAILS_SECRET }}
   SYNSATION_SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+  DIGICERT_STM_CERTIFICATE_ID: ${{ secrets.DIGICERT_STM_CERTIFICATE_ID }}
+  DIGICERT_STM_API_BASE_URI: ${{ secrets.DIGICERT_STM_API_BASE_URI }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_B64: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_B64 }}
+  DIGICERT_STM_API_KEY: ${{ secrets.DIGICERT_STM_API_KEY }}
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
@@ -22,7 +24,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,47 +50,37 @@ jobs:
       - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
+      - name: Create Compliance Statement
+        # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
+        run: |
+          echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+      - name: Register as a SCITT Signed Statement
+         # Register the Signed Statement with DataTrails SCITT APIs
+        id: register-compliance-scitt-digicert-signed-statement
+        # uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@main
+        with:
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          payload: "./buildOutput/attestation.json"
+          content-type: "application/vnd.unknown.attestation+json"
+          skip-receipt: "1"
       - name: save-keys
         env:
           SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
         shell: bash
         run: |
           echo "$SIGNING_KEY" >> ./synsation.pem
-      - name: Docker Scout
-        id: docker-scout
-        uses: docker/scout-action@v1
-        with:
-          dockerhub-user: ${{ env.DOCKER_HUB_USER}}
-          dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
-          command: cves
-          image: ${{ steps.meta.outputs.tags }}
-          sarif-file: "./buildOutput/docker-scout-sarif.json"
-          summary: true
-      - name: Register Docker Scout Output as a SCITT Signed Statement
-        id: register-scitt-signed-statement
+      - name: Register Compliance Statement as a SCITT Signed Statement
+        id: register-compliance-scitt-signed-statement
         uses: datatrails/scitt-action@v0.4.4.10
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/docker-scout-sarif.json"
-          content-type: "application/vnd.docker.scout+json"
-          signing-key-file: "./synsation.pem"
-          issuer: "synsation.io"
-      - name: Generate SPDX SBOM
-        run: |
-          curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
-          chmod +x $RUNNER_TEMP/sbom-tool
-          $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
-      - name: Register SPDX as a SCITT Signed Statement
-        id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.10
-        with:
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
-          content-type: "application/spdx+json"
+          payload: "./buildOutput/attestation.json"
+          content-type: "application/vnd.unknown.attestation+json"
           signing-key-file: "./synsation.pem"
           issuer: "synsation.io"
       - name: Create Output Directory
@@ -106,33 +97,52 @@ jobs:
           format: json
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.10
+        # uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@main
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           content-type: "application/vnd.cyclonedx+json"
           payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
-          signing-key-file: "./synsation.pem"
-          issuer: "synsation.io"
-      - name: Create Compliance Statement
-        # SPDX automatically creates the _manifest sub directories.
-        # CycloneDX assumes the current directory
-        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
+          skip-receipt: "1"
+      - name: upload-cyclonedx-signed-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-signed-statement
+          path: receipt.cbor
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-receipt
+          path: receipt.cbor
+      - name: Generate SPDX SBOM
         run: |
-          echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
-      - name: Register Compliance Statement as a SCITT Signed Statement
-        id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.10
+          curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
+          chmod +x $RUNNER_TEMP/sbom-tool
+          $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose
+      - name: list-spdx-files
+        shell: bash
+        run: |
+          ls -a ./buildOutput/_manifest/spdx_2.2
+      - name: Register SPDX as a SCITT Signed Statement
+        id: register-spdx-scitt-signed-statement
+        uses: SteveLasker/digicert-scitt-action@main
+        # uses: digicert/scitt-action@v0.2
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/attestation.json"
-          content-type: "application/vnd.unknown.attestation+json"
-          signing-key-file: "./synsation.pem"
-          issuer: "synsation.io"
-      - name: cleanup-keys
-        shell: bash
-        run: |
-          rm ./synsation.pem
+          payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          content-type: "application/spdx+json"
+          skip-receipt: "1"
+      - name: upload-spdx-signed-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx-signed-statement
+          path: receipt.cbor
+      - name: upload-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx-receipt
+          path: receipt.cbor
