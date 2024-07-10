@@ -29,7 +29,7 @@ jobs:
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
       - name: Register as a SCITT Signed Statement
         id: register-compliance-scitt-digicert-signed-statement
-        uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/scitt-action@130ae96667f7135d9d6fc542d693d100da220edf
         with:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
