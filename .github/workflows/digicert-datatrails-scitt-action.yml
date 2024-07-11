@@ -25,10 +25,15 @@ jobs:
       - name: Create buildOutput Directory
         run: |
           mkdir -p ./buildOutput/
-      - name: Create Compliance Statement
+      - name: create-compliance-statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+      - name: upload-attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation.json
+          path: ./buildOutput/attestation.json
       - name: Register as a SCITT Signed Statement
         id: register-compliance-scitt-digicert-signed-statement
         uses: SteveLasker/scitt-action@hash-signed-statement
@@ -37,7 +42,7 @@ jobs:
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           payload-file: "./buildOutput/attestation.json"
-          payload-location: "storage.foo"
+          payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           skip-receipt: "0"
       - name: upload-signed-statement
