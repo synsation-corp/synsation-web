@@ -29,7 +29,8 @@ jobs:
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
-      - name: upload-attestation
+      - name: Upload Attestation
+        id: upload-attestation
         uses: actions/upload-artifact@v4
         with:
           name: attestation.json
