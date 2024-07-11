@@ -35,10 +35,11 @@ jobs:
         with:
           name: attestation.json
           path: ./buildOutput/attestation.json
-      - name: Output artifact ID
-        run:  echo 'Artifact ID is ${{ steps.upload-attestation.outputs.artifact-id }}'
-      - name: Output artifact url
-        run:  echo 'Artifact ID is ${{ steps.upload-attestation.outputs.artifact-url }}'
+      - name: Output artifact Info
+        id: output-artifact-info
+        run: |
+          echo 'Artifact ID is ${{ steps.upload-attestation.outputs.artifact-id }}'
+          echo 'Artifact URL is ${{ steps.upload-attestation.outputs.artifact-url }}'
       - name: Register as a SCITT Signed Statement
         id: register-compliance-scitt-digicert-signed-statement
         uses: SteveLasker/scitt-action@hash-signed-statement
