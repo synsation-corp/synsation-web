@@ -54,35 +54,25 @@ jobs:
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+      - name: Upload Attestation
+        id: upload-attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation.json
+          path: ./buildOutput/attestation.json
       - name: Register as a SCITT Signed Statement
          # Register the Signed Statement with DataTrails SCITT APIs
         id: register-compliance-scitt-digicert-signed-statement
         # uses: digicert/scitt-action@v0.2
-        uses: SteveLasker/digicert-scitt-action@main
+        uses: SteveLasker/digicert-scitt-action@hash-signed-statement
         with:
+          content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          payload-file: "./buildOutput/attestation.json"
+          payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
+          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/attestation.json"
-          content-type: "application/vnd.unknown.attestation+json"
-          skip-receipt: "1"
-      - name: save-keys
-        env:
-          SIGNING_KEY: ${{ env.SYNSATION_SIGNING_KEY }}
-        shell: bash
-        run: |
-          echo "$SIGNING_KEY" >> ./synsation.pem
-      - name: Register Compliance Statement as a SCITT Signed Statement
-        id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.4.4.10
-        with:
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/attestation.json"
-          content-type: "application/vnd.unknown.attestation+json"
-          signing-key-file: "./synsation.pem"
-          issuer: "synsation.io"
       - name: Create Output Directory
         # SPDX automatically creates the _manifest sub directories.
         # CycloneDX assumes the current directory
@@ -95,22 +85,29 @@ jobs:
           input: ./requirements.txt
           output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
           format: json
+      - name: Upload CycloneDX To Artifacts
+        id: upload-cyclonedx-to-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclone-dx.sbom.json
+          path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
         # uses: digicert/scitt-action@v0.2
-        uses: SteveLasker/digicert-scitt-action@main
+        uses: SteveLasker/digicert-scitt-action@hash-signed-statement
         with:
+          content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
+          payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
+          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          content-type: "application/vnd.cyclonedx+json"
-          payload: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
-          skip-receipt: "1"
       - name: upload-cyclonedx-signed-statement
         uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-signed-statement
-          path: receipt.cbor
+          path: signed-statement.cbor
       - name: upload-receipt
         uses: actions/upload-artifact@v4
         with:
@@ -125,22 +122,28 @@ jobs:
         shell: bash
         run: |
           ls -a ./buildOutput/_manifest/spdx_2.2
+      - name: Upload SPDX to Artifacts
+        id: upload-spdx-to-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx.sbom.json
+          path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: SteveLasker/digicert-scitt-action@main
-        # uses: digicert/scitt-action@v0.2
+        uses: SteveLasker/digicert-scitt-action@hash-signed-statement
         with:
+          content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
+          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          payload: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
-          content-type: "application/spdx+json"
-          skip-receipt: "1"
       - name: upload-spdx-signed-statement
         uses: actions/upload-artifact@v4
         with:
           name: spdx-signed-statement
-          path: receipt.cbor
+          path: signed-statement.cbor
       - name: upload-receipt
         uses: actions/upload-artifact@v4
         with:
