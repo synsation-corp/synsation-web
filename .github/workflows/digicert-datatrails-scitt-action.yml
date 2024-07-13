@@ -36,7 +36,7 @@ jobs:
       - name: Sign & Register as a SCITT Signed Statement
          # Register the DigiCert Signed Statement with the DataTrails SCITT APIs
         id: register-compliance-scitt-signed-statement
-        uses: SteveLasker/scitt-action@hash-signed-statement
+        uses: datatrails/scitt-action@hash-signing
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
