@@ -1,4 +1,4 @@
-name: Docker Build/Push, SCITT Register Synsation Web
+name: Register Docker Build/Push, Signed SCITT Statement on DataTrails 
 
 on:
   workflow_dispatch:
