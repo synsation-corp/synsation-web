@@ -72,7 +72,7 @@ jobs:
           path: ./buildOutput/docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@steve/hash-signing
+        uses: datatrails/scitt-action@v0.5.0
         with:
           content-type: "application/vnd.docker.scout+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -83,6 +83,13 @@ jobs:
           signing-key-file: "./synsation.pem"
           skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: upload-docker-scout-scitt
+        uses: actions/upload-artifact@v4
+        with:
+          name: scout-signed-statement-receipt
+          path: |
+            signed-statement.cbor
+            receipt.cbor
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
@@ -96,7 +103,7 @@ jobs:
           path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@steve/hash-signing
+        uses: datatrails/scitt-action@v0.5.0
         with:
           content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -107,7 +114,14 @@ jobs:
           signing-key-file: "./synsation.pem"
           skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: Create Output Directory
+      - name: upload-spdx-scitt
+        uses: actions/upload-artifact@v4
+        with:
+          name: spdx-signed-statement-receipt
+          path: |
+            signed-statement.cbor
+            receipt.cbor
+      - name: Create CycloeDX Output Directory
         # SPDX automatically creates the _manifest sub directories.
         # CycloneDX assumes the current directory
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
@@ -127,7 +141,7 @@ jobs:
           path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
-        uses: datatrails/scitt-action@steve/hash-signing
+        uses: datatrails/scitt-action@v0.5.0
         with:
           content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -138,6 +152,12 @@ jobs:
           signing-key-file: "./synsation.pem"
           skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: scout-signed-statement-receipt
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            signed-statement.cbor
+            receipt.cbor
       - name: Create Compliance Statement
         # SPDX automatically creates the _manifest sub directories.
         # CycloneDX assumes the current directory
@@ -152,7 +172,7 @@ jobs:
           path: ./buildOutput/attestation.json
       - name: Register Compliance Statement as a SCITT Signed Statement
         id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@steve/hash-signing
+        uses: datatrails/scitt-action@v0.5.0
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -163,6 +183,12 @@ jobs:
           signing-key-file: "./synsation.pem"
           skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: upload-compliance-scitt
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            signed-statement.cbor
+            receipt.cbor
       - name: cleanup-keys
         shell: bash
         run: |
