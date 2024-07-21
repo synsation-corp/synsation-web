@@ -25,27 +25,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Log in to the Container registry
+      - id: registry-login
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
+      - id: docker-metadata
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: | 
             type=sha
-      - name: Build and push Docker image
+      - id: docker-build-push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-      - name: Create buildOutput Directory
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
+      - id: create-output-directory
         run: |
           mkdir -p ./buildOutput/
       - name: save-keys
@@ -64,15 +63,14 @@ jobs:
           image: ${{ steps.meta.outputs.tags }}
           sarif-file: "./buildOutput/docker-scout-sarif.json"
           summary: true
-      - name: Upload Scout Results
-        id: upload-scout-results
+      - id: upload-scout-results
         uses: actions/upload-artifact@v4
         with:
           name: attestation.json
           path: ./buildOutput/docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.5.0
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.docker.scout+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -81,29 +79,24 @@ jobs:
           payload-file: "./buildOutput/docker-scout-sarif.json"
           payload-location: ${{ steps.upload-scout-results.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
-          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: upload-docker-scout-scitt
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: scout-signed-statement-receipt
-          path: |
-            signed-statement.cbor
-            receipt.cbor
+          name: scout-transparent-statement
+          path: transparent-statement.cbor
       - name: Generate SPDX SBOM
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose -D true
-      - name: Upload SPDX SBOM
-        id: upload-spdx-sbom
+      - id: upload-spdx-sbom
         uses: actions/upload-artifact@v4
         with:
           name: manifest.spdx.json
           path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.5.0
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -112,15 +105,11 @@ jobs:
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
-          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: upload-spdx-scitt
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: spdx-signed-statement-receipt
-          path: |
-            signed-statement.cbor
-            receipt.cbor
+          name: spdx-transparent-statement
+          path: transparent-statement.cbor
       - name: Create CycloeDX Output Directory
         # SPDX automatically creates the _manifest sub directories.
         # CycloneDX assumes the current directory
@@ -133,15 +122,13 @@ jobs:
           input: ./requirements.txt
           output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
           format: json
-      - name: Upload CycloneDX SBOM
-        id: upload-cyclonedx-sbom
+      - id: upload-cyclonedx-sbom
         uses: actions/upload-artifact@v4
         with:
           name: cyclone-dx.sbom.json
           path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
       - name: Register CylconeDX as a SCITT Signed Statement
-        id: register-cyclonedx-signed-statement
-        uses: datatrails/scitt-action@v0.5.0
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -150,45 +137,37 @@ jobs:
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
-          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: scout-signed-statement-receipt
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          path: |
-            signed-statement.cbor
-            receipt.cbor
+          name: cyclonedx-transparent-statement
+          path: transparent-statement.cbor
       - name: Create Compliance Statement
         # SPDX automatically creates the _manifest sub directories.
         # CycloneDX assumes the current directory
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
           echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
-      - name: Upload Compliance Statement
-        id: upload-compliance-statement
+      - id: upload-compliance-transparent-statement
         uses: actions/upload-artifact@v4
         with:
           name: compliance-statement
           path: ./buildOutput/attestation.json
-      - name: Register Compliance Statement as a SCITT Signed Statement
-        id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.5.0
+      - id: register-compliance-scitt-signed-statement
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-secret: ${{ env.DATATRAILS_SECRET }}
           issuer: "synsation.io"
           payload-file: "./buildOutput/attestation.json"
-          payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
+          payload-location: ${{ steps.upload-compliance-transparent-statement.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
-          skip-receipt: "0"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - name: upload-compliance-scitt
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            signed-statement.cbor
-            receipt.cbor
+          path: transparent-statement.cbor
       - name: cleanup-keys
         shell: bash
         run: |
