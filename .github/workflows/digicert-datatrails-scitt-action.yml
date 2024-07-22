@@ -63,7 +63,7 @@ jobs:
       - name: Register Attestation as a SCITT Signed Statement
         id: register-compliance-scitt-digicert-signed-statement
         # uses: digicert/scitt-action@v0.2
-        uses: digicert/scitt-action/@hash-signed-statement
+        uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -96,7 +96,7 @@ jobs:
       - name: Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
         # uses: digicert/scitt-action@v0.2
-        uses: datatrails/scitt-action@steve/transparent-statement
+        uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -125,7 +125,7 @@ jobs:
           path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@steve/transparent-statement
+        uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
