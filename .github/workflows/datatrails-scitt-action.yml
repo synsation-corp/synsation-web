@@ -9,7 +9,7 @@ on:
 
 env:
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
-  DATATRAILS_SECRET: ${{ secrets.DATATRAILS_SECRET }}
+  DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_SECRET }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
@@ -74,7 +74,7 @@ jobs:
         with:
           content-type: "application/vnd.docker.scout+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          datatrails-client_secret: ${{ env.DATATRAILS_SECRET }}
           issuer: "synsation.io"
           payload-file: "./buildOutput/docker-scout-sarif.json"
           payload-location: ${{ steps.upload-scout-results.outputs.artifact-url }}
@@ -100,7 +100,7 @@ jobs:
         with:
           content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          datatrails-client_secret: ${{ env.DATATRAILS_SECRET }}
           issuer: "synsation.io"
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-sbom.outputs.artifact-url }}
@@ -132,7 +132,7 @@ jobs:
         with:
           content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          datatrails-client_secret: ${{ env.DATATRAILS_SECRET }}
           issuer: "synsation.io"
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-sbom.outputs.artifact-url }}
@@ -158,7 +158,7 @@ jobs:
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_SECRET }}
+          datatrails-client_secret: ${{ env.DATATRAILS_SECRET }}
           issuer: "synsation.io"
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-compliance-transparent-statement.outputs.artifact-url }}
