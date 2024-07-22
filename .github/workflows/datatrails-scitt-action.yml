@@ -9,7 +9,7 @@ on:
 
 env:
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
-  DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_SECRET }}
+  DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
@@ -60,7 +60,7 @@ jobs:
           dockerhub-user: ${{ env.DOCKER_HUB_USER}}
           dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
           command: cves
-          image: ${{ steps.meta.outputs.tags }}
+          image: ${{ steps.docker-metadata.outputs.tags }}
           sarif-file: "./buildOutput/docker-scout-sarif.json"
           summary: true
       - id: upload-scout-results
