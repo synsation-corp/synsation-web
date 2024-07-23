@@ -80,7 +80,8 @@ jobs:
           payload-location: ${{ steps.upload-scout-results.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - uses: actions/upload-artifact@v4
+      - id: upload-scout-transparent-statement
+        uses: actions/upload-artifact@v4
         with:
           name: scout-transparent-statement
           path: transparent-statement.cbor
@@ -106,7 +107,8 @@ jobs:
           payload-location: ${{ steps.upload-spdx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - uses: actions/upload-artifact@v4
+      - id: upload-spdx-transparent-statement
+        uses: actions/upload-artifact@v4
         with:
           name: spdx-transparent-statement
           path: transparent-statement.cbor
@@ -138,7 +140,8 @@ jobs:
           payload-location: ${{ steps.upload-cyclonedx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - uses: actions/upload-artifact@v4
+      - id: upload-cyclonedx-transparent-statement
+        uses: actions/upload-artifact@v4
         with:
           name: cyclonedx-transparent-statement
           path: transparent-statement.cbor
@@ -148,7 +151,7 @@ jobs:
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
           echo '{"compliance.42":"true","software.eol":"2025-03-15"}' >> ./buildOutput/attestation.json
-      - id: upload-compliance-transparent-statement
+      - id: upload-compliance-statement
         uses: actions/upload-artifact@v4
         with:
           name: compliance-statement
@@ -164,9 +167,10 @@ jobs:
           payload-location: ${{ steps.upload-compliance-transparent-statement.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: upload-compliance-scitt
+      - id: upload-compliance-transparent-statement
         uses: actions/upload-artifact@v4
         with:
+          name: compliance-transparent-statement
           path: transparent-statement.cbor
       - name: cleanup-keys
         shell: bash
