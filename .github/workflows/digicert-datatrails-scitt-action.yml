@@ -67,7 +67,7 @@ jobs:
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
