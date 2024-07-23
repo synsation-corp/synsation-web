@@ -1,4 +1,4 @@
-name: Register SBOMs as DigiCert Signed SCITT Statement on DataTrails
+name: DigiCert Register SBOMs as DigiCert Signed SCITT Statement on DataTrails
 
 on:
   workflow_dispatch:
