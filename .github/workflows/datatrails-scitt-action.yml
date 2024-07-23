@@ -70,7 +70,7 @@ jobs:
           path: ./buildOutput/docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
-        uses: datatrails/scitt-action@transparent-statement
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.docker.scout+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -96,7 +96,7 @@ jobs:
           path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
       - name: Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
-        uses: datatrails/scitt-action@transparent-statement
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/spdx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -128,7 +128,7 @@ jobs:
           name: cyclone-dx.sbom.json
           path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
       - name: Register CylconeDX as a SCITT Signed Statement
-        uses: datatrails/scitt-action@transparent-statement
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
@@ -154,7 +154,7 @@ jobs:
           name: compliance-statement
           path: ./buildOutput/attestation.json
       - id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@transparent-statement
+        uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
