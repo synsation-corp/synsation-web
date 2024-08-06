@@ -5,20 +5,24 @@ on:
   # push:
   #   branches: [ "main" ]
 env:
+  # DataTrails Config
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
-  SYNSATION_SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
+
+  # DigiCert Config
   DIGICERT_STM_CERTIFICATE_ID: ${{ secrets.DIGICERT_STM_CERTIFICATE_ID }}
   DIGICERT_STM_API_BASE_URI: ${{ secrets.DIGICERT_STM_API_BASE_URI }}
   DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD }}
   DIGICERT_STM_API_CLIENTAUTH_P12_B64: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_B64 }}
   DIGICERT_STM_API_KEY: ${{ secrets.DIGICERT_STM_API_KEY }}
+
+  # Container/Registry Configs
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 jobs:
-  build-image-register-DataTrails-SCITT:
+  build-image-DigiCert-Sign-Register-DataTrails-SCITT:
     runs-on: ubuntu-latest
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
@@ -27,7 +31,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Log in to the Container registry
+      - name: Login to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
@@ -40,19 +44,16 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: | 
             type=sha
-      - name: Build and push Docker image
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-      - name: Create buildOutput Directory
-        run: |
-          mkdir -p ./buildOutput/
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
+          mkdir -p ./buildOutput/
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
       - name: Upload Attestation
         id: upload-attestation
@@ -76,8 +77,6 @@ jobs:
           name: attestation--transparent-statement
           path: transparent-statement.cbor
       - name: Create Output Directory
-        # SPDX automatically creates the _manifest sub directories.
-        # CycloneDX assumes the current directory
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
           mkdir -p ./buildOutput/_manifest/cyclonedx/
@@ -93,7 +92,7 @@ jobs:
         with:
           name: cyclone-dx.sbom.json
           path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
-      - name: Register CylconeDX as a SCITT Signed Statement
+      - name: DigiCert Sign, Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
         # uses: digicert/scitt-action@v0.2
         uses: steveLasker/digicert-scitt-action@transparent-statement
@@ -113,17 +112,13 @@ jobs:
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose -D true
-      - name: list-spdx-files
-        shell: bash
-        run: |
-          ls -a ./buildOutput/_manifest/spdx_2.2
       - name: Upload SPDX to Artifacts
         id: upload-spdx-to-artifacts
         uses: actions/upload-artifact@v4
         with:
           name: spdx.sbom.json
           path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
-      - name: Register SPDX as a SCITT Signed Statement
+      - name: DigiCert Sign, Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
