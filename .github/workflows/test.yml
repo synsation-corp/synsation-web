@@ -1,0 +1,51 @@
+name: Register a DigiCert Signed SCITT Statement on DataTrails
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ "main" ]
+env:
+  DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
+  DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
+  DIGICERT_STM_CERTIFICATE_ID: ${{ secrets.DIGICERT_STM_CERTIFICATE_ID }}
+  DIGICERT_STM_API_BASE_URI: ${{ secrets.DIGICERT_STM_API_BASE_URI }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_PASSWORD }}
+  DIGICERT_STM_API_CLIENTAUTH_P12_B64: ${{ secrets.DIGICERT_STM_API_CLIENTAUTH_P12_B64 }}
+  DIGICERT_STM_API_KEY: ${{ secrets.DIGICERT_STM_API_KEY }}
+jobs:
+  build-image-register-DataTrails-SCITT:
+    runs-on: ubuntu-latest
+    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Create buildOutput Directory
+        run: |
+          mkdir -p ./buildOutput/
+      - name: Create Compliance Statement
+        # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
+        run: |
+          echo '{"author": "fred", "title": "my biography", "reviews": "mixed"}' > ./buildOutput/attestation.json
+      - name: Upload Attestation
+        id: upload-attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation.json
+          path: ./buildOutput/attestation.json
+      - name: Sign & Register as a SCITT Signed Statement
+         # Register the DigiCert Signed Statement with the DataTrails SCITT APIs
+        id: register-compliance-scitt-signed-statement
+        uses: steveLasker/digicert-scitt-action@transparent-statement
+        with:
+          content-type: "application/vnd.unknown.attestation+json"
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          payload-file: "./buildOutput/attestation.json"
+          payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
+          subject: ${{ github.server_url }}/${{ github.repository }}@${{ github.sha }}
+      - name: upload-transparent-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: transparent-statement
+          path: transparent-statement.cbor
