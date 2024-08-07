@@ -48,8 +48,34 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
+      - name: Create Compliance Statement
+        # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
+        run: |
+          mkdir -p ./buildOutput/
+          echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+      - name: Upload Attestation
+        id: upload-attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation.json
+          path: ./buildOutput/attestation.json
+      - name: Register Attestation as a SCITT Signed Statement
+        id: register-compliance-scitt-digicert-signed-statement
+        # uses: digicert/scitt-action@v0.2
+        uses: steveLasker/digicert-scitt-action@transparent-statement
+        with:
+          content-type: "application/vnd.unknown.attestation+json"
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          payload-file: "./buildOutput/attestation.json"
+          payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: attestation--transparent-statement
+          path: transparent-statement.cbor
       - name: Create Output Directory
         # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
         run: |
