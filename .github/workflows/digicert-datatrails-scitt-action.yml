@@ -5,6 +5,9 @@ on:
   # push:
   #   branches: [ "main" ]
 env:
+  # DataTrails Config
+  DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
+  DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
   # DigiCert Config
   DIGICERT_STM_CERTIFICATE_ID: ${{ secrets.DIGICERT_STM_CERTIFICATE_ID }}
   DIGICERT_STM_API_BASE_URI: ${{ secrets.DIGICERT_STM_API_BASE_URI }}
@@ -63,12 +66,11 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
-          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - uses: actions/upload-artifact@v4
+      - name: Upload Compliance Transparent Statement
+        uses: actions/upload-artifact@v4
         with:
           name: compliance--transparent-statement
           path: transparent-statement.cbor
@@ -94,8 +96,6 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
-          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -119,8 +119,6 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/spdx+json"
-          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
