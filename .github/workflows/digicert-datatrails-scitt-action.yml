@@ -67,8 +67,8 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -98,8 +98,8 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -123,8 +123,8 @@ jobs:
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/spdx+json"
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
+          datatrails-client_id: ${{ secrets.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
