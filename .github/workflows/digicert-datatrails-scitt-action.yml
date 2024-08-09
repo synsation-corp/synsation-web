@@ -69,7 +69,7 @@ jobs:
           content-type: "application/vnd.unknown.attestation+json"
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha_short }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - name: Upload Compliance Transparent Statement
         uses: actions/upload-artifact@v4
         with:
@@ -99,7 +99,7 @@ jobs:
           content-type: "application/vnd.cyclonedx+json"
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha_short }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - uses: actions/upload-artifact@v4
         with:
           name: cyclonedx--transparent-statement
@@ -122,7 +122,7 @@ jobs:
           content-type: "application/spdx+json"
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha_short }}
+          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - uses: actions/upload-artifact@v4
         with:
           name: spdx--transparent-statement
