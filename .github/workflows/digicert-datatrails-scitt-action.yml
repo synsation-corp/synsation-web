@@ -50,6 +50,35 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+      - name: Docker Scout
+        id: docker-scout
+        uses: docker/scout-action@v1.13.0
+        with:
+          dockerhub-user: ${{ env.DOCKER_HUB_USER}}
+          dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
+          command: cves
+          image: ${{ steps.meta.outputs.tags }}
+          sarif-file: "./buildOutput/docker-scout-sarif.json"
+          summary: true
+      - id: upload-scout-results
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-scout-sarif.json
+          path: ./buildOutput/docker-scout-sarif.json
+      - name: Register Docker Scout Output as a SCITT Signed Statement
+        id: register-scitt-signed-statement
+        #uses: datatrails/scitt-action@steve/transparent-statement
+        uses: steveLasker/digicert-scitt-action@transparent-statement
+        with:
+          content-type: "application/vnd.docker.scout+json"
+          payload-file: "./buildOutput/docker-scout-sarif.json"
+          payload-location: ${{ steps.upload-scout-results.outputs.artifact-url }}
+          subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+      - id: upload-scout-transparent-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: scout-transparent-statement
+          path: transparent-statement.cbor
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
