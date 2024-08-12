@@ -58,20 +58,20 @@ jobs:
           dockerhub-password: ${{ env.DOCKER_HUB_TOKEN }}
           command: cves
           image: ${{ steps.meta.outputs.tags }}
-          sarif-file: "./buildOutput/docker-scout-sarif.json"
+          sarif-file: "./docker-scout-sarif.json"
           summary: true
       - id: upload-scout-results
         uses: actions/upload-artifact@v4
         with:
           name: docker-scout-sarif.json
-          path: ./buildOutput/docker-scout-sarif.json
+          path: ./docker-scout-sarif.json
       - name: Register Docker Scout Output as a SCITT Signed Statement
         id: register-scitt-signed-statement
         #uses: datatrails/scitt-action@steve/transparent-statement
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.docker.scout+json"
-          payload-file: "./buildOutput/docker-scout-sarif.json"
+          payload-file: "./docker-scout-sarif.json"
           payload-location: ${{ steps.upload-scout-results.outputs.artifact-url }}
           subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - id: upload-scout-transparent-statement
@@ -82,21 +82,20 @@ jobs:
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
-          mkdir -p ./buildOutput/
-          echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+          echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./attestation.json
       - name: Upload Compliance Statement
         id: upload-compliance-statement
         uses: actions/upload-artifact@v4
         with:
           name: attestation.json
-          path: ./buildOutput/attestation.json
+          path: ./attestation.json
       - name: Register Compliance Statement as a SCITT Signed Statement
         id: register-compliance-scitt-digicert-signed-statement
         # uses: digicert/scitt-action@v0.2
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
-          payload-file: "./buildOutput/attestation.json"
+          payload-file: "./attestation.json"
           payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
           subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - name: Upload Compliance Transparent Statement
@@ -104,29 +103,25 @@ jobs:
         with:
           name: compliance--transparent-statement
           path: transparent-statement.cbor
-      - name: Create Output Directory
-        # Creating a cyclonedx subdir, in addition to the ./buildOutput for SPDX
-        run: |
-          mkdir -p ./buildOutput/_manifest/cyclonedx/
       - name: Generate CycloneDX SBOM for Python
         uses: CycloneDX/gh-python-generate-sbom@v2
         with:
           input: ./requirements.txt
-          output: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
+          output: ./cyclone-dx.sbom.json
           format: json
       - name: Upload CycloneDX To Artifacts
         id: upload-cyclonedx-to-artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cyclone-dx.sbom.json
-          path: ./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json
+          path: ./cyclone-dx.sbom.json
       - name: DigiCert Sign, Register CylconeDX as a SCITT Signed Statement
         id: register-cyclonedx-signed-statement
         # uses: digicert/scitt-action@v0.2
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
-          payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
+          payload-file: "./cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
           subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - uses: actions/upload-artifact@v4
@@ -137,19 +132,19 @@ jobs:
         run: |
           curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x $RUNNER_TEMP/sbom-tool
-          $RUNNER_TEMP/sbom-tool generate -b ./buildOutput -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose -D true
+          $RUNNER_TEMP/sbom-tool generate -b ./ -bc . -pn synsation-web -pv 1.0.0 -ps synsation-org -nsb https://synsation.io -V Verbose -D true
       - name: Upload SPDX to Artifacts
         id: upload-spdx-to-artifacts
         uses: actions/upload-artifact@v4
         with:
           name: spdx.sbom.json
-          path: ./buildOutput/_manifest/spdx_2.2/manifest.spdx.json
+          path: ./_manifest/spdx_2.2/manifest.spdx.json
       - name: DigiCert Sign, Register SPDX as a SCITT Signed Statement
         id: register-spdx-scitt-signed-statement
         uses: steveLasker/digicert-scitt-action@transparent-statement
         with:
           content-type: "application/spdx+json"
-          payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
+          payload-file: "./_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
           subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - uses: actions/upload-artifact@v4
