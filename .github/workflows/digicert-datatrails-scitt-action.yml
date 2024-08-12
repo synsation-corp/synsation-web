@@ -55,6 +55,8 @@ jobs:
         run: |
           mkdir -p ./buildOutput/
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
+          echo steps.meta.outputs.tags[0]
+          echo steps.meta.outputs.tags[1]
       - name: Upload Compliance Statement
         id: upload-compliance-statement
         uses: actions/upload-artifact@v4
