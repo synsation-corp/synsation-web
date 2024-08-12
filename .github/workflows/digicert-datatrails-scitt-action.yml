@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p ./buildOutput/
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
-          echo 'fromJSON(steps.meta.outputs.json).tags:${{ fromJSON(steps.meta.outputs.json).tags }}'
+          echo 'fromJSON(steps.meta.outputs.json).tags:${{ fromJSON(steps.meta.outputs.json).tags[0] }}'
           echo 'env.DOCKER_METADATA_OUTPUT_TAGS:${{ env.DOCKER_METADATA_OUTPUT_TAGS }}'
       - name: Upload Compliance Statement
         id: upload-compliance-statement
