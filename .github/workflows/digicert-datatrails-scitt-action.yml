@@ -43,8 +43,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: | 
-            type=sha,format=long
-            type=ref,event=branch
+            type=sha,format=long,priority=100
+            type=ref,event=branch,priority=90
       - name: Build and Push Docker Image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
@@ -56,8 +56,8 @@ jobs:
         run: |
           mkdir -p ./buildOutput/
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
-          # echo "steps.meta.outputs.tags:" ${{ fromJSON(steps.meta.outputs.tags) }}
-          # echo "env.DOCKER_METADATA_OUTPUT_TAGS:" ${{ env.DOCKER_METADATA_OUTPUT_TAGS }}
+          echo "steps.meta.outputs.tags:" ${{ fromJSON(steps.meta.outputs.tags) }}
+          echo "env.DOCKER_METADATA_OUTPUT_TAGS:" ${{ env.DOCKER_METADATA_OUTPUT_TAGS }}
       - name: Upload Compliance Statement
         id: upload-compliance-statement
         uses: actions/upload-artifact@v4
