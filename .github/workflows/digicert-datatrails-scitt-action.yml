@@ -45,13 +45,17 @@ jobs:
           tags: | 
             type=sha,format=long,priority=100
             type=ref,event=branch,priority=90
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
       - name: Create Compliance Statement
         # A sample compliance file. Replace with an SBOM, in-toto statement, image for content authenticity, ...
         run: |
           mkdir -p ./buildOutput/
           echo '{"author": "fred", "title": "my biography", "reviews": "awesome"}' > ./buildOutput/attestation.json
-          echo 'fromJSON(steps.meta.outputs.json).tags:${{ fromJSON(steps.meta.outputs.json).tags[0] }}'
-          echo 'env.DOCKER_METADATA_OUTPUT_TAGS:${{ env.DOCKER_METADATA_OUTPUT_TAGS }}'
       - name: Upload Compliance Statement
         id: upload-compliance-statement
         uses: actions/upload-artifact@v4
@@ -96,7 +100,7 @@ jobs:
           content-type: "application/vnd.cyclonedx+json"
           payload-file: "./buildOutput/_manifest/cyclonedx/cyclone-dx.sbom.json"
           payload-location: ${{ steps.upload-cyclonedx-to-artifacts.outputs.artifact-url }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - uses: actions/upload-artifact@v4
         with:
           name: cyclonedx--transparent-statement
@@ -119,7 +123,7 @@ jobs:
           content-type: "application/spdx+json"
           payload-file: "./buildOutput/_manifest/spdx_2.2/manifest.spdx.json"
           payload-location: ${{ steps.upload-spdx-to-artifacts.outputs.artifact-url }}
-          subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          subject: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       - uses: actions/upload-artifact@v4
         with:
           name: spdx--transparent-statement
