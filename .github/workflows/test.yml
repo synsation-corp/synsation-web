@@ -1,7 +1,8 @@
 name: Register SCITT Statement
 
 on:
-  push:
+  workflow_dispatch:
+  # push:
     # branches: [ "main" ]
 
 env:
