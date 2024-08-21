@@ -43,8 +43,8 @@ jobs:
         uses: datatrails/scitt-action@hashed-payload
         with:
           content-type: "application/vnd.unknown.attestation+json"
-          payload_file: "./buildOutput/attestation.json"
-          payload_location: ${{ steps.upload-attestation.outputs.artifact-url }}
+          payload-file: "./buildOutput/attestation.json"
+          payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
           subject: ${{ env.SUBJECT }}
           issuer: ${{ env.ISSUER}}
           signing-key-file: "./signingkey.pem"
