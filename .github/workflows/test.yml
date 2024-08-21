@@ -34,15 +34,13 @@ jobs:
       - name: Register as a SCITT Signed Statement
         # Register the Signed Statement wit DataTrails SCITT APIs
         id: register-compliance-scitt-signed-statement
-        uses: datatrails/scitt-action@v0.5.0
+        uses: datatrails/scitt-action@hashed-payload
         with:
-          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
-          datatrails-secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
-          subject: ${{ env.SUBJECT }}
-          payload: "./buildOutput/attestation.json"
           content-type: "application/vnd.unknown.attestation+json"
-          signing-key-file: "./signingkey.pem"
           issuer: ${{ env.ISSUER}}
+          payload: "./buildOutput/attestation.json"
+          subject: ${{ env.SUBJECT }}
+          signing-key-file: "./signingkey.pem"
       - name: cleanup-keys
         shell: bash
         run: |
