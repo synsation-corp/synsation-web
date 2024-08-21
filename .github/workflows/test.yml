@@ -49,6 +49,11 @@ jobs:
           subject: ${{ env.SUBJECT }}
           issuer: ${{ env.ISSUER}}
           signing-key-file: "./signingkey.pem"
+      - name: upload-transparent-statement
+        uses: actions/upload-artifact@v4
+        with:
+          name: transparent-statement
+          path: transparent-statement.cbor
       - name: cleanup-keys
         shell: bash
         run: |
