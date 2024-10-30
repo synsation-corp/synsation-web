@@ -6,6 +6,7 @@ on:
   #   branches: [ "main" ]
 env:
   # DataTrails Config
+  DATATRAILS_URL: ${{ secrets.DATATRAILS_URL }}
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
 

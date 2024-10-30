@@ -8,6 +8,7 @@ on:
   #   branches: [ "main" ]
 
 env:
+  DATATRAILS_URL: ${{ secrets.DATATRAILS_URL }}
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
   DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
@@ -73,6 +74,7 @@ jobs:
         uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.docker.scout+json"
+          datatrails-url: ${{ env.DATATRAILS_URL }}
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           issuer: "synsation.io"
@@ -100,6 +102,7 @@ jobs:
         uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/spdx+json"
+          datatrails-url: ${{ env.DATATRAILS_URL }}
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           issuer: "synsation.io"
@@ -107,6 +110,7 @@ jobs:
           payload-location: ${{ steps.upload-spdx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
       - id: upload-spdx-transparent-statement
         uses: actions/upload-artifact@v4
         with:
@@ -133,6 +137,7 @@ jobs:
         uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.cyclonedx+json"
+          datatrails-url: ${{ env.DATATRAILS_URL }}
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           issuer: "synsation.io"
@@ -140,6 +145,7 @@ jobs:
           payload-location: ${{ steps.upload-cyclonedx-sbom.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
       - id: upload-cyclonedx-transparent-statement
         uses: actions/upload-artifact@v4
         with:
@@ -160,6 +166,7 @@ jobs:
         uses: datatrails/scitt-action@steve/transparent-statement
         with:
           content-type: "application/vnd.unknown.attestation+json"
+          datatrails-url: ${{ env.DATATRAILS_URL }}
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           issuer: "synsation.io"
@@ -167,6 +174,7 @@ jobs:
           payload-location: ${{ steps.upload-compliance-statement.outputs.artifact-url }}
           signing-key-file: "./synsation.pem"
           subject: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
       - id: upload-compliance-transparent-statement
         uses: actions/upload-artifact@v4
         with:
