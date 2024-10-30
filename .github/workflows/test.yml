@@ -43,7 +43,8 @@ jobs:
         id: register-compliance-scitt-signed-statement
         uses: datatrails/scitt-action@dev/robin/9170-update-scitt-receipts-for-forestrie
         with:
-          datatrails-url: ${{ env.DATATRAILS_URL }}
+          datatrails-url: https://app.dev-robin-0.dev.datatrails.ai
+          # datatrails-url: ${{ env.DATATRAILS_URL }}
           datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
           datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           content-type: "application/vnd.unknown.attestation+json"
