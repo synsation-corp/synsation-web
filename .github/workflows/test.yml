@@ -6,7 +6,6 @@ on:
     # branches: [ "main" ]
 
 env:
-  DATATRAILS_URL: ${{ env.DATATRAILS_URL }}
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
   SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
