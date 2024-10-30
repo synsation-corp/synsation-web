@@ -6,7 +6,7 @@ on:
     # branches: [ "main" ]
 
 env:
-  DATATRAILS_URL: ${{ secrets.DATATRAILS_URL }}
+  DATATRAILS_URL: ${{ env.DATATRAILS_URL }}
   DATATRAILS_CLIENT_ID: ${{ secrets.DATATRAILS_CLIENT_ID }}
   DATATRAILS_CLIENT_SECRET: ${{ secrets.DATATRAILS_CLIENT_SECRET }}
   SIGNING_KEY: ${{ secrets.SYNSATION_SIGNING_KEY }}
@@ -45,6 +45,8 @@ jobs:
         uses: datatrails/scitt-action@dev/robin/9170-update-scitt-receipts-for-forestrie
         with:
           datatrails-url: ${{ env.DATATRAILS_URL }}
+          datatrails-client_id: ${{ env.DATATRAILS_CLIENT_ID }}
+          datatrails-client_secret: ${{ env.DATATRAILS_CLIENT_SECRET }}
           content-type: "application/vnd.unknown.attestation+json"
           payload-file: "./buildOutput/attestation.json"
           payload-location: ${{ steps.upload-attestation.outputs.artifact-url }}
